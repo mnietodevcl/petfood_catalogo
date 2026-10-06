@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "626821455045",
+    "project_id": "petfood-catalogo-mnieto-866b5",
+    "storage_bucket": "petfood-catalogo-mnieto-866b5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:626821455045:android:a60716bde7195699a5a4ac",
+        "android_client_info": {
+          "package_name": "cl.mnieto.petfood_catalogo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "626821455045-g00kso6kujucodggp3ml7eh1tqfkbb3e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "cl.mnieto.petfood_catalogo",
+            "certificate_hash": "868c59d01172e729b46b7177d2601127a6bbbfef"
+          }
+        },
+        {
+          "client_id": "626821455045-v30nsplf11gf6354cisp8mlc7ldtlp97.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBE9wABqiMrSXU3-JkRN5sDhSzawh50njA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "626821455045-v30nsplf11gf6354cisp8mlc7ldtlp97.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

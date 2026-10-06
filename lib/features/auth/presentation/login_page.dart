@@ -1,9 +1,81 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../data/auth_providers.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  ConsumerState<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends ConsumerState<LoginPage> {
+  bool _isLoading = false;
+
+  Future<void> _signInWithGoogle() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await ref.read(authRepositoryProvider).signInWithGoogle();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sesión iniciada correctamente'),
+        ),
+      );
+    } on GoogleSignInException catch (error) {
+      if (!mounted) return;
+
+      // Si el usuario cierra el selector de Google,
+      // simplemente volvemos al Login sin mostrar error.
+      if (error.code != GoogleSignInExceptionCode.canceled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              error.description ??
+                  'No se pudo iniciar sesión con Google.',
+            ),
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error.message ?? 'No se pudo iniciar sesión.',
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Ocurrió un error al iniciar sesión.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +85,7 @@ class LoginPage extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: LayoutBuilder(
-          builder: (context, constraints) {
+          builder: (context, _) {
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
                 horizontal: 20,
@@ -27,7 +99,7 @@ class LoginPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Marca
+                      // Logo / Marca
                       Center(
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -49,27 +121,28 @@ class LoginPage extends StatelessWidget {
                             ],
                           ),
                           child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ClipOval(
-                                      child: Image.asset(
-                                        'assets/images/petfood_app_icon.png',
-                                        width: 30,
-                                        height: 30,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'PetFood Catálogo',
-                                      style: theme.textTheme.titleMedium?.copyWith(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                  ],
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ClipOval(
+                                child: Image.asset(
+                                  'assets/images/petfood_app_icon.png',
+                                  width: 30,
+                                  height: 30,
+                                  fit: BoxFit.cover,
                                 ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'PetFood Catálogo',
+                                style:
+                                    theme.textTheme.titleMedium?.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
 
@@ -90,10 +163,12 @@ class LoginPage extends StatelessWidget {
 
                       // Descripción
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                        ),
                         child: Text(
                           'Consulta y administra productos de alimento para '
-                          'animales de manera rápida y sencilla.',
+                          'perros y gatos de manera rápida y sencilla.',
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyLarge?.copyWith(
                             color: AppColors.textPrimary,
@@ -105,7 +180,7 @@ class LoginPage extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // Zona visual
+                      // Imagen principal
                       AspectRatio(
                         aspectRatio: 1.34,
                         child: ClipRRect(
@@ -118,7 +193,7 @@ class LoginPage extends StatelessWidget {
                                 fit: BoxFit.cover,
                               ),
 
-                              // Degradado suave inferior para dar contraste a la etiqueta
+                              // Degradado inferior
                               Align(
                                 alignment: Alignment.bottomCenter,
                                 child: Container(
@@ -129,7 +204,9 @@ class LoginPage extends StatelessWidget {
                                       end: Alignment.bottomCenter,
                                       colors: [
                                         Colors.transparent,
-                                        Colors.black.withValues(alpha: 0.10),
+                                        Colors.black.withValues(
+                                          alpha: 0.10,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -148,8 +225,11 @@ class LoginPage extends StatelessWidget {
                                       vertical: 7,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AppColors.surface.withValues(alpha: 0.92),
-                                      borderRadius: BorderRadius.circular(24),
+                                      color: AppColors.surface.withValues(
+                                        alpha: 0.92,
+                                      ),
+                                      borderRadius:
+                                          BorderRadius.circular(24),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -164,8 +244,11 @@ class LoginPage extends StatelessWidget {
                                           child: Text(
                                             'Nutrición clínica y bienestar diario',
                                             textAlign: TextAlign.center,
-                                            style: theme.textTheme.bodyMedium?.copyWith(
-                                              color: AppColors.textSecondary,
+                                            style: theme
+                                                .textTheme.bodyMedium
+                                                ?.copyWith(
+                                              color:
+                                                  AppColors.textSecondary,
                                               fontSize: 13,
                                             ),
                                           ),
@@ -186,13 +269,12 @@ class LoginPage extends StatelessWidget {
                       SizedBox(
                         height: 54,
                         child: OutlinedButton(
-                          onPressed: () {
-                            // FASE 4:
-                            // aquí se implementará Google Sign-In.
-                          },
+                          onPressed:
+                              _isLoading ? null : _signInWithGoogle,
                           style: OutlinedButton.styleFrom(
                             backgroundColor: AppColors.surface,
                             foregroundColor: AppColors.textPrimary,
+                            disabledBackgroundColor: AppColors.surface,
                             side: const BorderSide(
                               color: Color(0xFF7AA7F8),
                               width: 1.4,
@@ -201,34 +283,47 @@ class LoginPage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(15),
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                              'assets/images/google_logo.png',
-                              width: 21,
-                              height: 21,
-                              fit: BoxFit.contain,
-                            ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Continuar con Google',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/google_logo.png',
+                                      width: 21,
+                                      height: 21,
+                                      fit: BoxFit.contain,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'Continuar con Google',
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                        color: AppColors.textPrimary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
 
                       const SizedBox(height: 14),
 
-                      // Seguridad
+                      // Información de seguridad
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                        ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -245,7 +340,8 @@ class LoginPage extends StatelessWidget {
                               child: Text(
                                 'Acceso seguro con tu cuenta de Google.\n'
                                 'No compartimos tu información personal.',
-                                style: theme.textTheme.bodyMedium?.copyWith(
+                                style:
+                                    theme.textTheme.bodyMedium?.copyWith(
                                   color: AppColors.textPrimary,
                                   fontSize: 14,
                                   height: 1.25,
@@ -260,7 +356,9 @@ class LoginPage extends StatelessWidget {
 
                       // Sincronización
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 28),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 28,
+                        ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -276,7 +374,8 @@ class LoginPage extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 'Catálogo sincronizado en tiempo real',
-                                style: theme.textTheme.bodyMedium?.copyWith(
+                                style:
+                                    theme.textTheme.bodyMedium?.copyWith(
                                   color: AppColors.textSecondary,
                                   fontSize: 14,
                                 ),
