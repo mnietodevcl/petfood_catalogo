@@ -12,6 +12,8 @@ class Products extends Table {
 
   RealColumn get price => real()();
 
+  TextColumn get presentation => text().nullable()();
+
   // Imagen principal del alimento
   TextColumn get productImagePath =>
       text().nullable()();

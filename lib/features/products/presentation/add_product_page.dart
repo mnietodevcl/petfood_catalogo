@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'product_form_page.dart';
+
 class AddProductPage extends StatelessWidget {
   const AddProductPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Agregar producto'),
-      ),
-      body: const SafeArea(
-        child: Center(
-          child: Text('Pantalla Agregar producto'),
-        ),
-      ),
-    );
+    return const ProductFormPage();
   }
 }
